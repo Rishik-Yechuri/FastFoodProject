@@ -7,6 +7,7 @@ import java.awt.image.BufferStrategy;
 import java.io.File;
 import java.security.Key;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Observable;
 import java.util.function.Predicate;
@@ -19,10 +20,10 @@ public class FastFoodProject {
     //declare variables for the UI
     static JFrame frame;
     static Canvas canvas;
+    static boolean drawOnce = true;
     static BufferStrategy bufferStrategy;
     static BufferStrategy bufferStrategy2;
     //declare variables for the background thread
-    static int tempNums = 0;
     static long previousTime = 0;
     static long currentTime = 0;
     static long previousTimeBack = 0;
@@ -71,16 +72,19 @@ public class FastFoodProject {
         mainWich.moveWich(0, 964);
         //generate map
         holdDangers = new ArrayList<SpikeObjectClass>();
+        /*holdDangers.add(null);
+        holdDangers.add(null);*/
         for (int x = 0; x < 200; x++) {
             int temp = (Math.random() < 0.88) ? 1 : 2;
             if (temp == 1) {
+                holdDangers.add(null);
+                //x = x + 2;
+            } else {
                 SpikeObjectClass spikeToAdd = new SpikeObjectClass(x * 50 + 13, 974);
                 holdDangers.add(spikeToAdd);
                 holdDangers.add(null);
                 holdDangers.add(null);
                 x = x + 2;
-            } else {
-                holdDangers.add(null);
             }
         }
         System.out.println("size " + holdDangers.size());
@@ -119,13 +123,13 @@ public class FastFoodProject {
                 try {
                     currentTime = System.currentTimeMillis();
                     long timePassed = currentTime - previousTime;
-                    if (timePassed >= 17) {
+                    if (timePassed >= 1) {
                         clearScreen(g);
                         Paint();
                         //clearScreen(g);
                         previousTime = currentTime;
                     } else {
-                        Thread.sleep(17 - timePassed);
+                        Thread.sleep(1 - timePassed);
                     }
                 } catch (InterruptedException ex) {
                 }
@@ -162,8 +166,9 @@ public class FastFoodProject {
             for (int x = 0; x < holdDangers.size(); x++) {
                 if (holdDangers.get(x) != null) {
                     SpikeObjectClass spike = holdDangers.get(x);
-                    Shape spikeShape = spike.getShape();
+                    Polygon spikeShape = spike.getShape();
                     g.draw(spikeShape);
+                    System.out.println("paint called draw:" + Arrays.toString(spikeShape.xpoints) + " y: " + Arrays.toString(spikeShape.ypoints));
                 }
             }
         }
@@ -171,19 +176,16 @@ public class FastFoodProject {
     }
 
     public static void doBackgroundStuff() {
-        System.out.println("many" + tempNums);
-        tempNums++;
         for (int x = 0; x < holdDangers.size(); x++) {
             if (holdDangers.get(x) != null) {
                 holdDangers.get(x).move(holdDangers.get(x).xPosition - 4, holdDangers.get(x).yPosition);
                 if (mainWich.wichCollided(holdDangers.get(x).getShape()) < 1) {
-                    keepRunning = false;
+                   // keepRunning = false;
                 }
                 if (holdDangers.get(x).xPosition < -30) {
                     holdDangers.remove(x);
                 }
             }
         }
-        frameStartLine += 4;
     }
 }
