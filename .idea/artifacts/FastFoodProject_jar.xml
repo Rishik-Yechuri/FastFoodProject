@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="FastFoodProject:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/FastFoodProject_jar</output-path>
+    <root id="archive" name="FastFoodProject.jar">
+      <element id="module-output" name="FastFoodProject" />
+    </root>
+  </artifact>
+</component>

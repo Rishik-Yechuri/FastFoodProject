@@ -20,7 +20,6 @@ public class FastFoodProject {
     //declare variables for the UI
     static JFrame frame;
     static Canvas canvas;
-    static boolean drawOnce = true;
     static BufferStrategy bufferStrategy;
     static BufferStrategy bufferStrategy2;
     //declare variables for the background thread
@@ -30,10 +29,10 @@ public class FastFoodProject {
     static long currentTimeBack = 0;
     static SandWichClass mainWich;
     static boolean keepRunning = true;
-    static boolean isSpacePressed = false;
+    static boolean[] interactionInfo;
+    static int jumpHeight = 0;
+    static boolean isEmpty = false;
     static ArrayList<SpikeObjectClass> holdDangers;
-    static ArrayList<SpikeObjectClass> onScreenDangers;
-    static int frameStartLine = 0;
 
     public static void main(String[] args) {
         //set up stuff for the Canvas
@@ -69,12 +68,12 @@ public class FastFoodProject {
         canvas.requestFocus();
         //Create SanwichClass
         mainWich = new SandWichClass();
-        mainWich.moveWich(0, 964);
+        mainWich.moveWich(30, 955);
         //generate map
         holdDangers = new ArrayList<SpikeObjectClass>();
         /*holdDangers.add(null);
         holdDangers.add(null);*/
-        for (int x = 0; x < 200; x++) {
+        for (int x = 3; x < 200; x++) {
             int temp = (Math.random() < 0.88) ? 1 : 2;
             if (temp == 1) {
                 holdDangers.add(null);
@@ -87,14 +86,13 @@ public class FastFoodProject {
                 x = x + 2;
             }
         }
+        interactionInfo = new boolean[2];
         System.out.println("size " + holdDangers.size());
         //Create a background and foreground thread,then start them
         Thread back = new Thread(new BackgroundClass());
         Thread fore = new Thread(new Foregroundclass());
         back.start();
         fore.start();
-
-
     }
 
     public static class BackgroundClass implements Runnable {
@@ -140,13 +138,13 @@ public class FastFoodProject {
 
     public static void processKey(KeyEvent evt) {
         if (evt.getKeyCode() == KeyEvent.VK_SPACE) {
-            isSpacePressed = true;
+            interactionInfo[0] = true;
         }
     }
 
     public static void processKeyRemoved(KeyEvent evt) {
         if (evt.getKeyCode() == KeyEvent.VK_SPACE) {
-            isSpacePressed = false;
+            interactionInfo[0] = false;
         }
     }
 
@@ -161,18 +159,22 @@ public class FastFoodProject {
     }
 
     protected static void Paint(Graphics2D g) throws InterruptedException {
-        Shape wich = new Rectangle(mainWich.xLocation, mainWich.yLocation, 64, 36);
+        Shape wich = new Rectangle(mainWich.xLocation, mainWich.yLocation, 80, 45);
         if (holdDangers != null) {
             for (int x = 0; x < holdDangers.size(); x++) {
                 if (holdDangers.get(x) != null) {
                     SpikeObjectClass spike = holdDangers.get(x);
                     Polygon spikeShape = spike.getShape();
-                    g.draw(spikeShape);
+                    g.setColor(Color.BLACK);
+                    g.fill(spikeShape);
+                    // g.setColor(Color.YELLOW);
                     System.out.println("paint called draw:" + Arrays.toString(spikeShape.xpoints) + " y: " + Arrays.toString(spikeShape.ypoints));
                 }
             }
         }
-        g.draw(wich);
+        Color color = new Color(168,141,17);
+        g.setColor(color);
+        g.fill(wich);
     }
 
     public static void doBackgroundStuff() {
@@ -180,12 +182,41 @@ public class FastFoodProject {
             if (holdDangers.get(x) != null) {
                 holdDangers.get(x).move(holdDangers.get(x).xPosition - 4, holdDangers.get(x).yPosition);
                 if (mainWich.wichCollided(holdDangers.get(x).getShape()) < 1) {
-                   // keepRunning = false;
+                    keepRunning = false;
                 }
                 if (holdDangers.get(x).xPosition < -30) {
                     holdDangers.remove(x);
                 }
             }
         }
+        ArrayList<SpikeObjectClass> tempList = holdDangers;
+        tempList.remove(null);
+        if(tempList.size() == 0){
+            keepRunning = false;
+            frame.setTitle("You Won");
+        }
+        if(interactionInfo[0]){
+            if(jumpHeight == 0){
+                interactionInfo[1] = true;
+                jumpHeight+=5;
+            }else if(jumpHeight > 0 && jumpHeight < 120 && interactionInfo[1]){
+                jumpHeight+=5;
+            }else if(jumpHeight == 120){
+                interactionInfo[1] = false;
+                jumpHeight-=5;
+            }else if(jumpHeight > 0 && !interactionInfo[1]){
+                jumpHeight-=5;
+            }
+        }else if(jumpHeight > 0){
+            if(jumpHeight > 0 && jumpHeight < 120 && interactionInfo[1]){
+                jumpHeight+=5;
+            }else if(jumpHeight == 120){
+                interactionInfo[1] = false;
+                jumpHeight-=5;
+            }else if(jumpHeight > 0 && !interactionInfo[1]){
+                jumpHeight-=5;
+            }
+        }
+        mainWich.moveWich(mainWich.xLocation,955 - jumpHeight);
     }
 }

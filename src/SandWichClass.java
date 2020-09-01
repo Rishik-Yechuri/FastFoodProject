@@ -23,7 +23,6 @@ public class SandWichClass {
         Rectangle2D wichShape = transformedWich.getBounds2D();
 
         //Creates a Polygon object which represents the obstacle
-        Polygon collisionPolygon = /*new Polygon()*/collisionShape;
         /*for (int[] objectPoint : objectPoints) {
             collisionPolygon.addPoint(objectPoint[0], objectPoint[1]);
         }*/
@@ -31,7 +30,7 @@ public class SandWichClass {
         /*Checks to see if the WhichWich has collided with the given obstacle,
         and returns true if it has
         */
-        if(collisionPolygon.intersects(wichShape)){
+        if(collisionShape.intersects(wichShape)){
             healthLeft--;
             //return true;
         }
